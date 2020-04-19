@@ -8,7 +8,9 @@ def run(size=(100, 1), gens=100, prop=0.5):
     """Runs simulation."""
 
     pop = population(size=size)
-    best = 0
+    fit = fitness(pop)
+    best = np.amax(fit)
+    initial = best
 
     evolving = True
     gen = 0
@@ -17,24 +19,33 @@ def run(size=(100, 1), gens=100, prop=0.5):
         pop = evolve(pop, prop=prop)
         gen += 1
         evolving = gen < gens
-    progress(pop, best, last=True)
+
+    summary(initial, best)
 
 
-def progress(pop, prev, last=False):
+def progress(pop, prev):
     """Prints progress."""
 
     fit = fitness(pop)
     best = np.amax(fit)
 
-    prev_out = f"{prev:.2f}"
-    out = f"{best:.2f}"
+    prev_out = f"Progress: {prev:.2f}"
+    out = f"Progress: {best:.2f}"
     clear = " " * len(prev_out)
     print(f"\r{clear}", end="")
-
-    end = "\n" if last else ""
-    print(f"\r{out}", end=end)
+    print(f"\r{out}", end="")
 
     return best
+
+
+def summary(initial, best):
+    """Prints summary."""
+
+    prev_out = f"Progress: {best:.2f}"
+    clear = " " * len(prev_out)
+    print(f"\r{clear}", end="")
+    print(f"\rInitial: {initial:.2f}")
+    print(f"Best: {best:.2f}")
 
 
 def population(size=(100, 1)):
@@ -122,7 +133,7 @@ def main(argv):
     help_message = """usage: evo.py [options]
     options:
         -h, --help          Prints help message.
-        --seed s            Sets seed 's'. Default: '123'.
+        --seed s            Sets seed 's'. Default: 'None'.
         --size s            Sets population size 's'. Default: '100'.
         --gens g            Sets generations 'g'. Default: '100'.
         --prop p            Sets proportion 'p'. Default: '0.5'."""
@@ -133,7 +144,7 @@ def main(argv):
         print(help_message)
         return
 
-    seed = 123
+    seed = None
     n = 100
     gens = 100
     prop = 0.5
@@ -151,8 +162,9 @@ def main(argv):
         elif opt == "--prop":
             prop = float(arg)
 
-    random.seed(seed)
-    np.random.seed(seed)
+    if seed is not None:
+        random.seed(seed)
+        np.random.seed(seed)
 
     run(size=(n, 1), gens=gens, prop=prop)
 
